@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import blockchains
+from routers import blockchain
 
 app = FastAPI()
 
