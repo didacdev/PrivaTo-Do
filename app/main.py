@@ -1,6 +1,10 @@
 from fastapi import FastAPI
+from routers import blockchains
 
 app = FastAPI()
+
+# Routers
+app.include_router(blockchains.router)
 
 
 @app.get("/")
