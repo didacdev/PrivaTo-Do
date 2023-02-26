@@ -48,6 +48,34 @@ async def task(task: Task):
                             )
 
 
+@router.put("/", response_model=list[Task], status_code=status.HTTP_201_CREATED)
+async def tasks(tasks_list: list[Task]):
+    valid_tasks_chain = chain_validation(tasks_list)
+
+    if get_tasks_list():
+        if valid_tasks_chain:
+            db_client.tasks.drop()
+
+            for task in tasks_list:
+                db_client.tasks.insert_one(task)
+
+            return get_tasks_list()
+        else:
+            raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED,
+                                detail={"error": f"valid_chain={valid_tasks_chain}"}
+                                )
+    else:
+        if valid_tasks_chain:
+            for task in tasks_list:
+                db_client.tasks.insert_one(task)
+
+            return get_tasks_list()
+        else:
+            raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED,
+                                detail={"error": f"valid_chain={valid_tasks_chain}"}
+                                )
+
+
 # ----------------------------------------- Functions ------------------------------------------------------------#
 def create_new_task(task: Task):
     task.timestamp = datetime.now()
@@ -58,7 +86,7 @@ def create_new_task(task: Task):
     return dict(task)
 
 
-def get_tasks_list() -> list[task_schema(Task)]:
+def get_tasks_list() -> list:
     task_list = tasks_schema(db_client.tasks.find())
     return task_list
 
@@ -81,7 +109,7 @@ def create_hash(task: Task):
     return str(hash)
 
 
-def chain_validation(tasks: list[task_schema(Task)]) -> bool:
+def chain_validation(tasks: list) -> bool:
     valid_chain = True
 
     for task in range(1, len(tasks)):
