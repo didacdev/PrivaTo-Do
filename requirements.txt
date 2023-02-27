@@ -1,0 +1,7 @@
+fastapi==0.92.0
+pydantic==1.10.4
+pymongo==4.3.3
+uvicorn
+aiofiles
+python-multipart
+jinja2

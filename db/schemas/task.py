@@ -1,3 +1,5 @@
+from db.models.task import TaskData
+
 def task_schema(task) -> dict:
     return {"id_hash": task["id_hash"],
             "timestamp": task["timestamp"],
