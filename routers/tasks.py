@@ -29,23 +29,16 @@ async def tasks():
 
 @router.post("/task", response_model=TaskDB, status_code=status.HTTP_201_CREATED)
 async def task(task: TaskData):
-    task_dict = create_new_task(task)
+    task_dict = create_task(task, False)
 
-    db_client.tasks.insert_one(task_dict)
+    return insert_task(task_dict)
 
-    tasks_list = get_tasks_list()
 
-    valid_tasks_chain = chain_validation(tasks_list)
+@router.put("/task", response_model=TaskDB, status_code=status.HTTP_201_CREATED)
+async def task(task: TaskDB):
+    task_dict = update_task(task, True)
 
-    if valid_tasks_chain:
-
-        new_task = task_schema(db_client.tasks.find_one({"id_hash": task_dict["id_hash"]}))
-        return TaskDB(**new_task)
-
-    else:
-        raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED,
-                            detail={"error": f"valid_chain={valid_tasks_chain}"}
-                            )
+    return insert_task(task_dict)
 
 
 @router.put("/", response_model=list[TaskDB], status_code=status.HTTP_201_CREATED)
@@ -67,12 +60,21 @@ async def tasks(tasks_list: list[TaskDB]):
 
 
 # ----------------------------------------- Functions ------------------------------------------------------------#
-def create_new_task(task: TaskData):
+def create_task(task: TaskData, state: bool):
     new_db_task = TaskDB(data=task.data)
     new_db_task.timestamp = datetime.now()
     new_db_task.last_hash = search_last_hash()
     new_db_task.id_hash = create_hash(new_db_task)
-    new_db_task.completed = False
+    new_db_task.completed = state
+
+    return dict(new_db_task)
+
+
+def update_task(task: TaskDB, state: bool):
+    new_db_task = TaskDB(data=task.data, timestamp=task.timestamp)
+    new_db_task.last_hash = search_last_hash()
+    new_db_task.id_hash = create_hash(task)
+    new_db_task.completed = state
 
     return dict(new_db_task)
 
@@ -98,6 +100,24 @@ def create_hash(task: TaskDB):
 
     hash = sha256(data_string.encode()).hexdigest()
     return str(hash)
+
+
+def insert_task(task: dict):
+    db_client.tasks.insert_one(task)
+
+    tasks_list = get_tasks_list()
+
+    valid_tasks_chain = chain_validation(tasks_list)
+
+    if valid_tasks_chain:
+
+        new_task = task_schema(db_client.tasks.find_one({"id_hash": task["id_hash"]}))
+        return TaskDB(**new_task)
+
+    else:
+        raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED,
+                            detail={"error": f"valid_chain={valid_tasks_chain}"}
+                            )
 
 
 def chain_validation(tasks: list):

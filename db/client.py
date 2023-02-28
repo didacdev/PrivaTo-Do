@@ -1,7 +1,9 @@
 from pymongo import MongoClient
 
 #------------ Base de datos local-----------------#
-# Ejecutar db en local: mongod --dbpath "/Users/diegosanchezescribano/didacdev/Workspace/MongoDB/data"
+# Ejecutar db en local:
+# MacOs: mongod --dbpath "/Users/diegosanchezescribano/didacdev/Workspace/MongoDB/data"
+# Windows: ./mongod --dbpath C:\Users\Diego\didacdev\Workspace\Mongodb\data
 db_client = MongoClient().local
 
 #------------Base de datos remota-----------------#
