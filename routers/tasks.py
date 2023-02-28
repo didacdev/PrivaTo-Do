@@ -5,6 +5,13 @@ from db.client import db_client
 from hashlib import sha256
 from datetime import datetime
 
+tags_metadata = [
+    {
+        "name": "tasks",
+        "description": "Operations with tasks."
+    }
+]
+
 router = APIRouter(prefix="/tasks",
                    tags=["tasks"],
                    responses={status.HTTP_404_NOT_FOUND: {"error": "Not found"}})
@@ -36,7 +43,7 @@ async def task(task: TaskData):
 
 @router.put("/task", response_model=TaskDB, status_code=status.HTTP_201_CREATED)
 async def task(task: TaskDB):
-    task_dict = update_task(task, True)
+    task_dict = create_task(task, True)
 
     return insert_task(task_dict)
 
@@ -70,15 +77,6 @@ def create_task(task: TaskData, state: bool):
     return dict(new_db_task)
 
 
-def update_task(task: TaskDB, state: bool):
-    new_db_task = TaskDB(data=task.data, timestamp=task.timestamp)
-    new_db_task.last_hash = search_last_hash()
-    new_db_task.id_hash = create_hash(task)
-    new_db_task.completed = state
-
-    return dict(new_db_task)
-
-
 def get_tasks_list():
     task_list = tasks_schema(db_client.tasks.find())
     return task_list
@@ -102,6 +100,23 @@ def create_hash(task: TaskDB):
     return str(hash)
 
 
+def chain_validation(tasks: list):
+    valid_chain = True
+
+    if tasks[0].last_hash:
+        valid_chain = False
+        return valid_chain
+
+    for task in range(1, len(tasks)):
+        actual_task = dict(tasks[task])
+        last_task = dict(tasks[task - 1])
+        if actual_task["last_hash"] != last_task["id_hash"]:
+            valid_chain = False
+            return valid_chain
+
+    return valid_chain
+
+
 def insert_task(task: dict):
     db_client.tasks.insert_one(task)
 
@@ -118,16 +133,3 @@ def insert_task(task: dict):
         raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED,
                             detail={"error": f"valid_chain={valid_tasks_chain}"}
                             )
-
-
-def chain_validation(tasks: list):
-    valid_chain = True
-
-    for task in range(1, len(tasks)):
-        actual_task = dict(tasks[task])
-        last_task = dict(tasks[task - 1])
-        if actual_task["last_hash"] != last_task["id_hash"]:
-            valid_chain = False
-            return valid_chain
-
-    return valid_chain
