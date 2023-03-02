@@ -20,6 +20,9 @@ router = APIRouter(prefix="/tasks",
 # -------------------------------------------- CRUD ---------------------------------------------------------------#
 @router.get("/", response_model=list[TaskDB])
 async def tasks():
+    """
+    Returns a task list as a blockchain.
+    """
     task_list = get_tasks_list()
 
     if not task_list:
@@ -36,6 +39,9 @@ async def tasks():
 
 @router.post("/task", response_model=TaskDB, status_code=status.HTTP_201_CREATED)
 async def task(task: TaskData):
+    """
+    Creates a new task with the completed field as False from the data written in the request body.
+    """
     task_dict = create_task(task, False)
 
     return insert_task(task_dict)
@@ -43,6 +49,9 @@ async def task(task: TaskData):
 
 @router.put("/task", response_model=TaskDB, status_code=status.HTTP_201_CREATED)
 async def task(task: TaskDB):
+    """
+    Updates a task as completed. The task must be introduced in the request body with the completed field as True.
+    """
     task_dict = create_task(task, True)
 
     return insert_task(task_dict)
@@ -50,6 +59,9 @@ async def task(task: TaskDB):
 
 @router.put("/", response_model=list[TaskDB], status_code=status.HTTP_201_CREATED)
 async def tasks(tasks_list: list[TaskDB]):
+    """
+    Replaces the present blockchain with the one that is introduced in the request body.
+    """
     valid_tasks_chain = chain_validation(tasks_list)
 
     if not valid_tasks_chain:
