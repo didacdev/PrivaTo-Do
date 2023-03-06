@@ -127,7 +127,7 @@ def search_last_hash():
 def chain_validation(tasks: list):
     valid_chain = True
 
-    if tasks[0].last_hash:
+    if tasks[0]["last_hash"]:
         valid_chain = False
         return valid_chain
 
