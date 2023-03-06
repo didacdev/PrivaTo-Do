@@ -8,7 +8,7 @@ description = """
 PrivaTo-Do is a **TODO list** and **note-taking**. The main difference of this app is that the tasks are
 stored in a [blockchain](https://builtin.com/blockchain) that creates a history with all the changes and modifications
 of the different notes/tasks.
-Check the Github repository [didacdev](https://github.com/didacdev).
+Check the Github repository [didacdev](https://github.com/didacdev/PrivaTo-Do).
 
 ## Tasks
 
@@ -22,7 +22,6 @@ app = FastAPI(
     title="PrivaTo-Do",
     description=description,
     version="0.0.1",
-    terms_of_service="http://example.com/terms/",
     contact={
         "name": "Diego Sánchez Escribano",
         "url": "https://didacdev.super.site/",
