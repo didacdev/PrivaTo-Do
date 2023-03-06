@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from routers import tasks
 
-# ejecutar MacOS: python3 -m uvicorn app.main:app --reload
-# ejecutar Windows: C:\Users\Diego\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\Scripts\uvicorn.exe app.main:app --reload
+# ejecutar en local: uvicorn app.main:app --reload
 
 description = """
 PrivaTo-Do is a **TODO list** and **note-taking**. The main difference of this app is that the tasks are

@@ -80,6 +80,9 @@ async def tasks(tasks_list: list[TaskDB]):
 
 # ----------------------------------------- Functions ------------------------------------------------------------#
 def create_task(task: TaskData, state: bool):
+    """"
+    Creates and returns a new task object from the fields data and completed
+    """
     new_db_task = TaskDB(data=task.data)
     new_db_task.timestamp = datetime.now()
     new_db_task.last_hash = search_last_hash()
@@ -89,12 +92,29 @@ def create_task(task: TaskData, state: bool):
     return dict(new_db_task)
 
 
+def create_hash(task: TaskDB):
+    """
+    Creates a new hash for the task block introduced as a param from de timestamp, data and last_hash fields
+    :param task: task block to use in the function
+    :return: a string with the new hash
+    """
+    timestamp = str(task.timestamp)
+    data_string = timestamp + task.last_hash + task.data
+
+    hash = sha256(data_string.encode()).hexdigest()
+    return str(hash)
+
+
 def get_tasks_list():
     task_list = tasks_schema(db_client.tasks.find())
     return task_list
 
 
 def search_last_hash():
+    """
+    Looks for the id_hash of the last task that has been created
+    :return: a string with the id_hash of the last task created
+    """
     task_list = get_tasks_list()
 
     if not task_list:
@@ -102,14 +122,6 @@ def search_last_hash():
     else:
         last_task = task_list[len(task_list) - 1]
         return last_task["id_hash"]
-
-
-def create_hash(task: TaskDB):
-    timestamp = str(task.timestamp)
-    data_string = timestamp + task.last_hash + task.data
-
-    hash = sha256(data_string.encode()).hexdigest()
-    return str(hash)
 
 
 def chain_validation(tasks: list):
